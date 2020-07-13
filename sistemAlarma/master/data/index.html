@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://kit.fontawesome.com/c47fa1c767.js" crossorigin="anonymous"></script>
+    <title>Sistem Alarma</title>
+    <style>
+        .css_on {
+            color: darkgreen;
+        }
+
+        .css_off {
+            color: darkorange;
+        }
+
+        .css_danger {
+            color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid text-center">
+        <div class="row text-center">
+            <div class="col-sm-12" style="color:red;font-size:7vh">
+                <p>Stare sistem</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <i id="stareSist" class="fas fa-exclamation-circle css_off" style="font-size:15vh"></i>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-sm-12" style="font-size:6vh">
+                <p id="demo">Alarma Inactiva</p>
+                <p id="demo1">Distanta</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <input type="button" class="btn btn-outline-danger btn-lg" id="id_reset" value="Resetare" style="fontsize:15vh">
+                <input type="button" class="btn btn-outline-success btn-lg" id="id_activate" value="Activare" style="fontsize:15vh">
+
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-sm-12" style="font-size:4vh">
+                <p>Data si Ora Declansarii</p>
+                <p id="date" style="font-size:2vh"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var pp = 0;
+        var pp1 = 0;
+        $(document).ready(function () {
+            $('#id_reset').click(function () {
+                $.ajax({
+                    url: '/stare',
+                    type: 'POST',
+                    data: { state: 'OFF' },
+                });
+                pp = 0;
+                pp1 = 0;
+                $('#stareSist').removeClass('css_danger').removeClass('fa-exclamation-triangle').addClass('fa-exclamation-circle').addClass('css_off');
+                document.getElementById("demo").innerHTML = "Alarma Inactiva";
+
+
+            });
+            $('#id_activate').click(function () {
+                $.ajax({
+                    url: '/stare',
+                    type: 'POST',
+                    data: { state: 'ACT' },
+                });
+                pp1 = 1;
+
+                $('#stareSist').removeClass('css_off').removeClass('fa-exclamation-circle').addClass('fa-check-circle').addClass('css_on');
+                document.getElementById("demo").innerHTML = "Alarma este activata";
+
+            });
+
+            setInterval(refreshFunction, 100);
+
+
+
+        });
+
+        function refreshFunction() {
+            $.get('/refresh', function (result) {
+                var value = parseFloat(result);
+                if (value < 50 && pp1==1) {
+
+                    $.ajax({
+                        url: '/stare',
+                        type: 'POST',
+                        data: { state: 'ONN' },
+                    });
+                    $('#stareSist').removeClass('css_off').removeClass('fa-exclamation-circle').addClass('fa-exclamation-triangle').addClass('css_danger');
+                    document.getElementById("demo").innerHTML = "Atentie Intrus!!!";
+                    document.getElementById("date").innerHTML = Date()  ;
+                    pp++;
+                }
+            });
+        }
+
+    </script>
+
+</body>
+</html>
